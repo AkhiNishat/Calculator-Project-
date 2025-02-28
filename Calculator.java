@@ -34,4 +34,24 @@ public class Calculator {
           display.setFont(new Font("Arial", Font.BOLD, 28));
           display.setHorizontalAlignment(SwingConstants.RIGHT);
           frame.add(display, BorderLayout.CENTER);
-          
+        JPanel panel = new JPanel(new GridLayout(5, 4, 5, 5));
+
+        String[] buttons = {
+            "C", "CE", "log", "ln",
+            "7", "8", "9", "/",
+            "4", "5", "6", "*",
+            "1", "2", "3", "-",
+            "0", ".", "=", "+"
+        };
+        
+        for (String text : buttons) {
+            JButton button = new JButton(text);
+            button.setFont(new Font("Arial", Font.BOLD, 14));
+            button.setFocusPainted(false);
+            button.addActionListener(new ButtonClickListener(display));
+            panel.add(button);
+        }
+        frame.add(panel, BorderLayout.SOUTH);
+        frame.setVisible(true);
+    }
+    
