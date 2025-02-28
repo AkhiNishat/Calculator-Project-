@@ -19,3 +19,19 @@ public class Calculator {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 400);
         frame.setLayout(new BorderLayout());
+
+          JPanel topPanel = new JPanel(new BorderLayout());
+          topPanel.setBackground(Color.WHITE);
+  
+          JLabel standardLabel = new JLabel(" = Standard", SwingConstants.LEFT);
+          standardLabel.setOpaque(true);
+          standardLabel.setBackground(Color.WHITE);
+          standardLabel.setFont(new Font("Arial", Font.BOLD, 16));
+          topPanel.add(standardLabel, BorderLayout.WEST);
+  
+          JTextField display = new JTextField("0");
+          display.setEditable(false);
+          display.setFont(new Font("Arial", Font.BOLD, 28));
+          display.setHorizontalAlignment(SwingConstants.RIGHT);
+          frame.add(display, BorderLayout.CENTER);
+          
