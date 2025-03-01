@@ -1,59 +1,81 @@
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Calculator {
     private double memory = 0;
     private double result = 0;
     private String currentInput = "0";
-    private String operator = ""; 
+    private String operator = "";
+    private final List<String> history = new ArrayList<>();
+    private JTextArea historyArea;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(Calculator::new);
     }
 
     public Calculator() {
-  
         JFrame frame = new JFrame("Calculator");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 400);
+        frame.setSize(500, 400);
         frame.setLayout(new BorderLayout());
-        
+
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(Color.WHITE);
 
-        JLabel standardLabel = new JLabel(" = Standard", SwingConstants.LEFT);
+        JLabel standardLabel = new JLabel("Standard", SwingConstants.LEFT);
         standardLabel.setOpaque(true);
         standardLabel.setBackground(Color.WHITE);
         standardLabel.setFont(new Font("Arial", Font.BOLD, 16));
         topPanel.add(standardLabel, BorderLayout.WEST);
-
+        
         JTextField display = new JTextField("0");
         display.setEditable(false);
         display.setFont(new Font("Arial", Font.BOLD, 28));
         display.setHorizontalAlignment(SwingConstants.RIGHT);
-        frame.add(display, BorderLayout.CENTER);
-
-        JPanel panel = new JPanel(new GridLayout(5, 4, 5, 5));
-
-        String[] buttons = {
-            "C", "CE", "log", "ln",
-            "7", "8", "9", "/",
-            "4", "5", "6", "*",
-            "1", "2", "3", "-",
-            "0", ".", "=", "+"
-        };
+        topPanel.add(display, BorderLayout.SOUTH);
         
+        frame.add(topPanel, BorderLayout.NORTH);
+        
+        JPanel mainPanel = new JPanel(new BorderLayout());
+
+        JPanel buttonPanel = new JPanel(new GridLayout(6, 4, 5, 5));
+        String[] buttons = {
+            "MC", "MR", "M+", "M-", "MS", "M▼",
+            "%", "CE", "C", "×", "1/x", "x^2", "√", "/",
+            "7", "8", "9", "X",
+            "4", "5", "6", "-",
+            "1", "2", "3", "+",
+            "±", "0", ".", "="
+        };
+
         for (String text : buttons) {
             JButton button = new JButton(text);
             button.setFont(new Font("Arial", Font.BOLD, 14));
             button.setFocusPainted(false);
             button.addActionListener(new ButtonClickListener(display));
-            panel.add(button);
+            buttonPanel.add(button);
         }
-        frame.add(panel, BorderLayout.SOUTH);
+        mainPanel.add(buttonPanel, BorderLayout.CENTER);
+        
+        historyArea = new JTextArea();
+        historyArea.setEditable(false);
+        historyArea.setFont(new Font("Arial", Font.PLAIN, 14));
+        JScrollPane historyPane = new JScrollPane(historyArea);
+        historyPane.setPreferredSize(new Dimension(150, 0));
+        
+        JPanel historyPanel = new JPanel(new BorderLayout());
+        JLabel historyLabel = new JLabel("History", SwingConstants.LEFT);
+        historyLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        historyPanel.add(historyLabel, BorderLayout.NORTH);
+        historyPanel.add(historyPane, BorderLayout.CENTER);
+
+        frame.add(mainPanel, BorderLayout.CENTER);
+        frame.add(historyPanel, BorderLayout.EAST);
+        
         frame.setVisible(true);
     }
     
@@ -78,16 +100,19 @@ public class Calculator {
                     break;
                 case "=":
                     performCalculation();
-                    operator = ""; 
+                    operator = "";
                     break;
-                case "log":
-                    currentInput = String.valueOf(Math.log10(Double.parseDouble(currentInput)));
+                case "x^2":
+                    currentInput = String.valueOf(Math.pow(Double.parseDouble(currentInput), 2));
                     break;
-                case "ln":
-                    currentInput = String.valueOf(Math.log(Double.parseDouble(currentInput)));
+                case "√":
+                    currentInput = String.valueOf(Math.sqrt(Double.parseDouble(currentInput)));
+                    break;
+                case "1/x":
+                    currentInput = String.valueOf(1 / Double.parseDouble(currentInput));
                     break;
                 case "/":
-                case "*":
+                case "X":
                 case "-":
                 case "+":
                     handleOperator(command);
@@ -105,10 +130,10 @@ public class Calculator {
 
         private void handleOperator(String newOperator) {
             if (!operator.isEmpty()) {
-                performCalculation(); 
+                performCalculation();
             }
             operator = newOperator;
-            result = Double.parseDouble(currentInput); 
+            result = Double.parseDouble(currentInput);
             currentInput = "0";
         }
 
@@ -121,7 +146,7 @@ public class Calculator {
                 case "-":
                     result -= input;
                     break;
-                case "*":
+                case "X":
                     result *= input;
                     break;
                 case "/":
@@ -136,7 +161,17 @@ public class Calculator {
                 default:
                     break;
             }
+            history.add(result+"");
+            updateHistory();
             currentInput = String.valueOf(result);
         }
+    }
+
+    private void updateHistory() {
+        StringBuilder sb = new StringBuilder();
+        for (String entry : history) {
+            sb.append(entry).append("\n");
+        }
+        historyArea.setText(sb.toString());
     }
 }
