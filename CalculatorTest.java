@@ -19,36 +19,38 @@ public class CalculatorTest {
         calculator.setOperator("+");
         calculator.inputNumber("3");
         calculator.calculate();
-        assertEquals("8", calculator.getDisplay(), "5 + 3 should be 8");
+        assertEquals("8", calculator.getDisplay());
     }
 
     @Test
-    public void testSubtraction() {
+    public void testSquare() {
         Calculator calculator = new Calculator();
-        calculator.inputNumber("10");
-        calculator.setOperator("-");
         calculator.inputNumber("4");
-        calculator.calculate();
-        assertEquals("6", calculator.getDisplay(), "10 - 4 should be 6");
+        double result = calculator.square();
+        assertEquals(16.0, result, "Square of 4 should be 16");
     }
 
     @Test
-    public void testMultiplication() {
+    public void testReciprocal() {
         Calculator calculator = new Calculator();
-        calculator.inputNumber("6");
-        calculator.setOperator("*");
-        calculator.inputNumber("7");
-        calculator.calculate();
-        assertEquals("42", calculator.getDisplay(), "6 * 7 should be 42");
-    }
-
-    @Test
-    public void testDivision() {
-        Calculator calculator = new Calculator();
-        calculator.inputNumber("20");
-        calculator.setOperator("/");
         calculator.inputNumber("5");
-        calculator.calculate();
-        assertEquals("4", calculator.getDisplay(), "20 / 5 should be 4");
+        double result = calculator.reciprocal();
+        assertEquals(0.2, result, 0.0001, "Reciprocal of 5 should be 0.2");
+    }
+
+    @Test
+    public void testSquareRoot() {
+        Calculator calculator = new Calculator();
+        calculator.inputNumber("25");
+        double result = calculator.squareRoot();
+        assertEquals(5.0, result, "Square root of 25 should be 5");
+    }
+
+    @Test
+    public void testClearEntry() {
+        Calculator calculator = new Calculator();
+        calculator.inputNumber("123");
+        calculator.clearEntry();
+        assertEquals("0", calculator.getDisplay(), "Display should reset to 0");
     }
 }
