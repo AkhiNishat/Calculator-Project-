@@ -1,52 +1,135 @@
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-public class CalculatorTest {
-    @Test
-    public void testNumberInput() {
-        Calculator calculator = new Calculator();
-        calculator.inputNumber("5");
-        assertEquals("5", calculator.getDisplay());
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-        calculator.inputNumber("8");
-        assertEquals("58", calculator.getDisplay());
+import javax.swing.*;
+
+import java.util.List;
+
+class CalculatorTest {
+    private Calculator calculator;
+    private JTextField mockDisplay;
+    private JTextArea mockHistoryArea;
+
+    @BeforeEach
+    void setUp() {
+        calculator = new Calculator();
+        
+        
+        mockDisplay = mock(JTextField.class);
+        mockHistoryArea = mock(JTextArea.class);
+        
+        
+        calculator.display = mockDisplay;
+        calculator.historyArea = mockHistoryArea;
     }
 
     @Test
-    public void testAddition() {
-        Calculator calculator = new Calculator();
+    void testInputNumber() {
+        calculator.inputNumber("5");
+        assertEquals("5", calculator.getCurrentInput());
+        verify(mockDisplay).setText("5");
+    }
+
+    @Test
+    void testSetOperator() {
+        calculator.inputNumber("10");
+        calculator.setOperator("+");
+        assertEquals("+", calculator.operator);
+        assertTrue(calculator.newInput);
+    }
+
+    @Test
+    void testAddition() {
         calculator.inputNumber("5");
         calculator.setOperator("+");
         calculator.inputNumber("3");
-        calculator.calculate();
-        assertEquals("8", calculator.getDisplay());
+        int result = calculator.calculate();
+        assertEquals(8, result);
+        verify(mockDisplay).setText("8");
     }
 
     @Test
-    public void testDivisionByZero() {
-        Calculator calculator = new Calculator();
+    void testSubtraction() {
+        calculator.inputNumber("10");
+        calculator.setOperator("-");
+        calculator.inputNumber("4");
+        int result = calculator.calculate();
+        assertEquals(6, result);
+        verify(mockDisplay).setText("6");
+    }
+
+    @Test
+    void testMultiplication() {
+        calculator.inputNumber("6");
+        calculator.setOperator("*");
+        calculator.inputNumber("7");
+        int result = calculator.calculate();
+        assertEquals(42, result);
+        verify(mockDisplay).setText("42");
+    }
+
+    @Test
+    void testDivision() {
+        calculator.inputNumber("20");
+        calculator.setOperator("/");
+        calculator.inputNumber("4");
+        int result = calculator.calculate();
+        assertEquals(5, result);
+        verify(mockDisplay).setText("5");
+    }
+
+    @Test
+    void testDivisionByZero() {
         calculator.inputNumber("10");
         calculator.setOperator("/");
         calculator.inputNumber("0");
         calculator.calculate();
-        assertEquals("Error", calculator.getDisplay(), "Division by zero should display Error");
+        verify(mockDisplay).setText("Error");
     }
 
     @Test
-    public void testNegativeSquareRoot() {
-        Calculator calculator = new Calculator();
-        calculator.inputNumber("-9");
-        double result = calculator.squareRoot();
-        assertEquals(0, result, "Square root of negative number should return 0 (error case)");
+    void testSquare() {
+        calculator.inputNumber("4");
+        double result = calculator.square();
+        assertEquals(16, result);
+        verify(mockHistoryArea).setText(contains("4² = 16"));
     }
 
     @Test
-    public void testHistory() {
-        Calculator calculator = new Calculator();
+    void testClearEntry() {
+        calculator.inputNumber("9");
+        calculator.clearEntry();
+        assertEquals("", calculator.getCurrentInput());
+        verify(mockDisplay).setText("0");
+    }
+
+    @Test
+    void testClearAll() {
+        calculator.inputNumber("9");
+        calculator.setOperator("+");
+        calculator.inputNumber("1");
+        calculator.calculate();
+        calculator.clearAll();
+        
+        assertEquals("", calculator.getCurrentInput());
+        assertEquals("", calculator.operator);
+        verify(mockDisplay).setText("0");
+        verify(mockHistoryArea).setText("");
+    }
+
+    @Test
+    void testHistoryTracking() {
         calculator.inputNumber("5");
         calculator.setOperator("+");
-        calculator.inputNumber("3");
+        calculator.inputNumber("5");
         calculator.calculate();
-        assertTrue(calculator.getHistory().contains("8"), "History should contain result 8");
+
+        List<String> history = calculator.getHistory();
+        assertTrue(history.contains("10.0"));
+        verify(mockHistoryArea).setText(contains("10.0"));
     }
 }
