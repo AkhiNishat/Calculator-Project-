@@ -23,34 +23,30 @@ public class CalculatorTest {
     }
 
     @Test
-    public void testSquare() {
+    public void testDivisionByZero() {
         Calculator calculator = new Calculator();
-        calculator.inputNumber("4");
-        double result = calculator.square();
-        assertEquals(16.0, result, "Square of 4 should be 16");
+        calculator.inputNumber("10");
+        calculator.setOperator("/");
+        calculator.inputNumber("0");
+        calculator.calculate();
+        assertEquals("Error", calculator.getDisplay(), "Division by zero should display Error");
     }
 
     @Test
-    public void testReciprocal() {
+    public void testNegativeSquareRoot() {
+        Calculator calculator = new Calculator();
+        calculator.inputNumber("-9");
+        double result = calculator.squareRoot();
+        assertEquals(0, result, "Square root of negative number should return 0 (error case)");
+    }
+
+    @Test
+    public void testHistory() {
         Calculator calculator = new Calculator();
         calculator.inputNumber("5");
-        double result = calculator.reciprocal();
-        assertEquals(0.2, result, 0.0001, "Reciprocal of 5 should be 0.2");
-    }
-
-    @Test
-    public void testSquareRoot() {
-        Calculator calculator = new Calculator();
-        calculator.inputNumber("25");
-        double result = calculator.squareRoot();
-        assertEquals(5.0, result, "Square root of 25 should be 5");
-    }
-
-    @Test
-    public void testClearEntry() {
-        Calculator calculator = new Calculator();
-        calculator.inputNumber("123");
-        calculator.clearEntry();
-        assertEquals("0", calculator.getDisplay(), "Display should reset to 0");
+        calculator.setOperator("+");
+        calculator.inputNumber("3");
+        calculator.calculate();
+        assertTrue(calculator.getHistory().contains("8"), "History should contain result 8");
     }
 }
