@@ -1,135 +1,95 @@
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.*;
+
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-import javax.swing.*;
-
-import java.util.List;
-
-class CalculatorTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class CalculatorTest {
     private Calculator calculator;
-    private JTextField mockDisplay;
-    private JTextArea mockHistoryArea;
+
+    @BeforeAll
+    static void initAll() {
+        System.out.println("Starting Calculator Tests...");
+    }
 
     @BeforeEach
-    void setUp() {
+    void init() {
         calculator = new Calculator();
-        
-        
-        mockDisplay = mock(JTextField.class);
-        mockHistoryArea = mock(JTextArea.class);
-        
-        
-        calculator.display = mockDisplay;
-        calculator.historyArea = mockHistoryArea;
     }
 
-    @Test
-    void testInputNumber() {
-        calculator.inputNumber("5");
-        assertEquals("5", calculator.getCurrentInput());
-        verify(mockDisplay).setText("5");
+    @ParameterizedTest
+    @CsvSource({
+            "5, 3, +, 8",
+            "10, 4, -, 6",
+            "6, 7, X, 42",
+            "20, 5, /, 4"
+    })
+    void testOperations(double a, double b, String operator, double expected) {
+        calculator.performOperation(a, "+");
+        assertEquals(expected, calculator.performOperation(b, operator));
     }
-
-    @Test
-    void testSetOperator() {
-        calculator.inputNumber("10");
-        calculator.setOperator("+");
-        assertEquals("+", calculator.operator);
-        assertTrue(calculator.newInput);
-    }
-
-    @Test
-    void testAddition() {
-        calculator.inputNumber("5");
-        calculator.setOperator("+");
-        calculator.inputNumber("3");
-        int result = calculator.calculate();
-        assertEquals(8, result);
-        verify(mockDisplay).setText("8");
-    }
-
-    @Test
-    void testSubtraction() {
-        calculator.inputNumber("10");
-        calculator.setOperator("-");
-        calculator.inputNumber("4");
-        int result = calculator.calculate();
-        assertEquals(6, result);
-        verify(mockDisplay).setText("6");
-    }
-
-    @Test
-    void testMultiplication() {
-        calculator.inputNumber("6");
-        calculator.setOperator("*");
-        calculator.inputNumber("7");
-        int result = calculator.calculate();
-        assertEquals(42, result);
-        verify(mockDisplay).setText("42");
-    }
-
-    @Test
-    void testDivision() {
-        calculator.inputNumber("20");
-        calculator.setOperator("/");
-        calculator.inputNumber("4");
-        int result = calculator.calculate();
-        assertEquals(5, result);
-        verify(mockDisplay).setText("5");
-    }
-
     @Test
     void testDivisionByZero() {
-        calculator.inputNumber("10");
-        calculator.setOperator("/");
-        calculator.inputNumber("0");
-        calculator.calculate();
-        verify(mockDisplay).setText("Error");
+        Exception exception = assertThrows(ArithmeticException.class, () -> calculator.performOperation(0, "/"));
+        assertEquals("Cannot divide by zero", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {2, 4, 9, 16})
+    void testSquare(double num) {
+        assertEquals(num * num, calculator.applyUnaryOperation(num, "x^2"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {1, 2, 4, 5})
+    void testReciprocal(double num) {
+        assertEquals(1 / num, calculator.applyUnaryOperation(num, "1/x"), 0.0001);
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {4, 9, 16, 25})
+    void testSquareRoot(double num) {
+        assertEquals(Math.sqrt(num), calculator.applyUnaryOperation(num, "√"));
     }
 
     @Test
-    void testSquare() {
-        calculator.inputNumber("4");
-        double result = calculator.square();
-        assertEquals(16, result);
-        verify(mockHistoryArea).setText(contains("4� = 16"));
+    void testSquareRootNegativeNumber() {
+        Exception exception = assertThrows(ArithmeticException.class, () -> calculator.applyUnaryOperation(-4, "√"));
+        assertEquals("Cannot calculate square root of a negative number", exception.getMessage());
     }
 
-    @Test
-    void testClearEntry() {
-        calculator.inputNumber("9");
-        calculator.clearEntry();
-        assertEquals("", calculator.getCurrentInput());
-        verify(mockDisplay).setText("0");
+    static Stream<Arguments> complexTestCases() {
+        return Stream.of(
+                Arguments.of(10, 5, "+", 15),
+                Arguments.of(50, 20, "-", 30),
+                Arguments.of(3, 3, "X", 9),
+                Arguments.of(100, 10, "/", 10)
+        );
     }
 
+    @ParameterizedTest
+    @MethodSource("complexTestCases")
+    void testComplexOperations(double a, double b, String operator, double expected) {
+        calculator.performOperation(a, "+");
+        assertEquals(expected, calculator.performOperation(b, operator));
+    }
     @Test
-    void testClearAll() {
-        calculator.inputNumber("9");
-        calculator.setOperator("+");
-        calculator.inputNumber("1");
-        calculator.calculate();
-        calculator.clearAll();
-        
-        assertEquals("", calculator.getCurrentInput());
-        assertEquals("", calculator.operator);
-        verify(mockDisplay).setText("0");
-        verify(mockHistoryArea).setText("");
+    void testReset() {
+        calculator.performOperation(10, "+");
+        calculator.reset();
+        assertEquals(0, calculator.getResult());
     }
 
-    @Test
-    void testHistoryTracking() {
-        calculator.inputNumber("5");
-        calculator.setOperator("+");
-        calculator.inputNumber("5");
-        calculator.calculate();
+    @AfterEach
+    void tearDown() {
+        System.out.println("Test completed.");
+    }
 
-        List<String> history = calculator.getHistory();
-        assertTrue(history.contains("10.0"));
-        verify(mockHistoryArea).setText(contains("10.0"));
+    @AfterAll
+    static void tearDownAll() {
+        System.out.println("All tests finished.");
     }
 }
